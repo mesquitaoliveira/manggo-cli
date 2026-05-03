@@ -10,8 +10,7 @@ CLI que lê specs OpenAPI e gera projetos Maven completos com clientes HTTP em t
 - Swagger Parser 2.x (leitura OpenAPI)
 - Mustache (templates de código gerado)
 - PicoCLI (parsing de argumentos CLI)
-- JUnit 5 (testes de integração com geração real em disco)
-- 
+- JUnit 5 (testes de integração)
 ---
 ## Estado Atual — Estrutura Real de Pacotes
 
