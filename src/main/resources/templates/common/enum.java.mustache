@@ -1,0 +1,30 @@
+package {{package}};
+
+import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum {{enumName}} {
+{{#constants}}
+    {{name}}("{{value}}"){{^last}},{{/last}}{{#last}};{{/last}}
+{{/constants}}
+
+    private final String value;
+
+    {{enumName}}(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @JsonCreator
+    public static {{enumName}} fromValue(String value) {
+        return Arrays.stream({{enumName}}.values())
+                .filter(e -> e.value.equalsIgnoreCase(value))
+                .findFirst()
+                .orElse(null);
+    }
+}

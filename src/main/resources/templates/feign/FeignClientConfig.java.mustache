@@ -1,0 +1,56 @@
+package {{package}};
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import feign.*;
+import feign.codec.Decoder;
+import feign.codec.Encoder;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
+
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static feign.Request.Options;
+import static java.util.Objects.nonNull;
+
+public class FeignClientConfig {
+    private static final ObjectMapper objectMapper;
+    private static final Encoder encoder;
+    private static final Decoder decoder;
+
+    static {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+        encoder = new JacksonEncoder(objectMapper);
+        decoder = new JacksonDecoder(objectMapper);
+    }
+
+    private FeignClientConfig() {
+    }
+
+    public static <T> T createProxy(
+            Class<T> apiClass,
+            String url,
+            Logger logger,
+            Client client,
+            Options options,
+            RequestInterceptor... interceptors) {
+
+        Feign.Builder builder = Feign.builder()
+                .encoder(encoder)
+                .decoder(decoder)
+                .logger(logger)
+                .logLevel(Logger.Level.FULL)
+                .options(options)
+                .retryer(Retryer.NEVER_RETRY)
+                .client(client);
+
+        for (RequestInterceptor interceptor : interceptors) {
+            if (nonNull(interceptor)) {
+                builder.requestInterceptor(interceptor);
+            }
+        }
+
+        return builder.target(apiClass, url);
+    }
+}

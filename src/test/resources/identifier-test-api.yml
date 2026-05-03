@@ -1,0 +1,104 @@
+openapi: "3.0.3"
+info:
+  title: Identifier Test API
+  version: "1.0"
+servers:
+  - url: https://api.test.com
+
+paths:
+  /status:
+    get:
+      tags: [items]
+      operationId: getStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ItemStatus' }
+
+  /info:
+    get:
+      tags: [items]
+      operationId: getInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item-Info' }
+
+  /policy:
+    get:
+      tags: [items]
+      operationId: getPolicy
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PolicyRule' }
+
+  /initiator:
+    get:
+      tags: [items]
+      operationId: getInitiatorConfig
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InitiatorConfig' }
+
+components:
+  schemas:
+
+    # Enum com valores que geram identificadores Java inválidos
+    ItemStatus:
+      type: string
+      enum:
+        - ACTIVE           # válido → ACTIVE
+        - 2-PHASE          # começa com dígito + hífen → _2_PHASE
+        - PENDING-DONE     # hífen → PENDING_DONE
+        - ALHUMA-2         # termina em dígito → ALHUMA_2
+
+    # Schema com nome inválido em Java (hífen)
+    Item-Info:
+      type: object
+      properties:
+        name:
+          type: string
+
+    # Schema com objeto inline em propriedade → deve gerar classe separada
+    InitiatorConfig:
+      type: object
+      properties:
+        operators:
+          type: object
+          description: Defines users/groups who can initiate the transaction.
+          properties:
+            wildcard:
+              type: string
+              enum:
+                - '*'
+              description: If used, all users are allowed.
+            users:
+              type: array
+              items:
+                type: string
+            usersGroups:
+              type: array
+              items:
+                type: string
+
+    # Schema com enum inline em propriedade → deve gerar classe separada de enum
+    PolicyRule:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - ALLOW
+            - DENY
+            - REQUIRE_APPROVAL
+        wildcardField:
+          type: string
+          enum:
+            - '*'
+          description: Wildcard — '*' deve virar constante STAR

@@ -1,0 +1,15 @@
+package {{package}};
+
+{{#imports}}
+{{.}}
+{{/imports}}
+public interface {{className}} {
+{{#methods}}
+{{#summary}}
+    /**
+     * {{summary}}
+     */
+{{/summary}}
+    {{returnType}} {{methodName}}({{params}});
+{{/methods}}
+}

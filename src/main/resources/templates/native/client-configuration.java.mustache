@@ -1,0 +1,59 @@
+package {{package}};
+
+import java.net.http.HttpClient;
+import java.time.Duration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import {{commonPackage}}.BaseRestClient;
+{{#imports}}
+{{.}}
+{{/imports}}
+
+@Configuration
+public class {{className}} {
+
+    @Value("${external.api.{{clientLower}}.url}")
+    private String apiUrl{{pascal}};
+
+    @Value("${external.api.{{clientLower}}.apikey}")
+    private String {{clientLower}}ApiKey;
+
+    @Value("${http.{{clientLower}}.connectionTimeoutMillis:5000}")
+    private int connectionTimeoutMillis;
+
+    @Bean
+    public HttpClient {{clientLower}}HttpClient() {
+        return HttpClient.newBuilder()
+                .connectTimeout(Duration.ofMillis(connectionTimeoutMillis))
+                .build();
+    }
+
+    @Bean
+    public ObjectMapper {{clientLower}}ObjectMapper() {
+        return new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
+    private <T extends BaseRestClient> T newClient(Class<T> clazz) {
+        try {
+            return clazz.getDeclaredConstructor(HttpClient.class, ObjectMapper.class, String.class, String.class)
+                    .newInstance({{clientLower}}HttpClient(), {{clientLower}}ObjectMapper(), apiUrl{{pascal}}, {{clientLower}}ApiKey);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to instantiate " + clazz.getSimpleName(), e);
+        }
+    }
+
+{{#beans}}
+    @Bean
+    public {{tagPascal}}Rest {{beanName}}() {
+        return newClient({{tagPascal}}RestClient.class);
+    }
+{{/beans}}
+}

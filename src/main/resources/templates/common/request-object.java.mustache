@@ -1,0 +1,67 @@
+package {{package}};
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import {{apiModelImport}};
+{{#imports}}
+{{.}}
+{{/imports}}
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class {{className}} extends ApiModel {
+{{#hasPathParams}}
+    // Path parameters
+{{/hasPathParams}}
+{{#pathParams}}
+    @JsonIgnore
+    private {{javaType}} {{fieldName}};
+
+{{/pathParams}}
+{{#hasHeaderParams}}
+    // Header parameters
+{{/hasHeaderParams}}
+{{#headerParams}}
+    @JsonIgnore
+    private {{javaType}} {{fieldName}};
+
+{{/headerParams}}
+{{#hasQueryParams}}
+    // Query parameters
+{{/hasQueryParams}}
+{{#queryParams}}
+    @JsonIgnore
+    private {{javaType}} {{fieldName}};
+
+{{/queryParams}}
+{{#hasBodyFields}}
+    // Body fields
+{{/hasBodyFields}}
+{{#bodyFields}}
+{{#description}}
+    /** {{description}} */
+{{/description}}
+    @JsonProperty("{{name}}")
+    private {{javaType}} {{fieldName}};
+
+{{/bodyFields}}
+    public {{className}}() {}
+
+{{#hasRequired}}
+    public {{className}}({{requiredSignature}}) {
+{{#requiredParams}}
+        this.{{fieldName}} = {{fieldName}};
+{{/requiredParams}}
+    }
+
+{{/hasRequired}}
+{{#accessors}}
+    public {{javaType}} get{{capitalizedName}}() {
+        return {{fieldName}};
+    }
+
+    public void set{{capitalizedName}}({{javaType}} {{fieldName}}) {
+        this.{{fieldName}} = {{fieldName}};
+    }
+{{/accessors}}
+}

@@ -1,0 +1,83 @@
+package {{package}};
+
+import feign.hc5.ApacheHttp5Client;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import java.util.concurrent.TimeUnit;
+import static feign.Request.Options;
+{{#imports}}
+{{.}}
+{{/imports}}
+
+@Configuration
+@Import({{importAnnotation}})
+public class {{className}} {
+    @Value("${external.api.{{clientLower}}.url}")
+    private String apiUrl{{pascal}};
+
+    @Value("${external.api.{{clientLower}}.apikey}")
+    private String {{clientLower}}ApiKey;
+
+    @Value("${feign.{{clientLower}}.connectionTimeoutMillis:5000}")
+    private int connectionTimeoutMillis;
+
+    @Value("${feign.{{clientLower}}.readTimeoutMillis:30000}")
+    private int readTimeoutMillis;
+
+    @Value("${feign.{{clientLower}}.maxConnectionPerRoute:20}")
+    private int maxConnectionPerRoute;
+
+    @Value("${feign.{{clientLower}}.maxConnTotal:50}")
+    private int maxConnTotal;
+
+    @Autowired
+    private {{pascal}}FeignLogger logger;
+
+    private ApacheHttp5Client client;
+    private Options options;
+
+    @Bean
+    public Options {{clientLower}}FeignOptions() {
+        this.options = new Options(
+                connectionTimeoutMillis, TimeUnit.MILLISECONDS,
+                readTimeoutMillis, TimeUnit.MILLISECONDS,
+                true);
+        return this.options;
+    }
+
+    @Bean
+    public ApacheHttp5Client {{clientLower}}HttpClient() {
+        final var connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(maxConnTotal);
+        connectionManager.setDefaultMaxPerRoute(maxConnectionPerRoute);
+
+        this.client = new ApacheHttp5Client(HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .build());
+        return this.client;
+    }
+
+    public <T> T create{{pascal}}Proxy(Class<T> clazz) {
+        return FeignClientConfig.createProxy(
+                clazz,
+                apiUrl{{pascal}},
+                logger,
+                client,
+                options,
+                new {{pascal}}ApiKeyInterceptor({{clientLower}}ApiKey)
+        );
+    }
+
+{{#beans}}
+    @Bean
+    public {{tagPascal}}Rest {{beanName}}() {
+        return create{{pascal}}Proxy({{tagPascal}}RestClient.class);
+    }
+
+{{/beans}}
+}

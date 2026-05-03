@@ -1,0 +1,656 @@
+openapi: "3.0.3"
+info:
+  title: Petstore API
+  version: "1.0.0"
+servers:
+  - url: https://api.petstore.example
+
+paths:
+
+  # ─── TAG: pets ────────────────────────────────────────────────────────────────
+
+  /pets:
+    get:
+      tags: [pets]
+      operationId: listPets
+      summary: List available pets
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { type: string }
+        - name: breed
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Pets found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetListResponse' }
+
+    post:
+      tags: [pets]
+      operationId: createPetOrder
+      summary: Create a pet order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePetOrderRequest' }
+      responses:
+        "200":
+          description: Order created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetOrderResponse' }
+
+  /pets/{id}:
+    get:
+      tags: [pets]
+      operationId: getPetById
+      summary: Get pet by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Pet found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetOrderResponse' }
+
+    patch:
+      tags: [pets]
+      operationId: updatePetOrder
+      summary: Update a pet order by ID (path param uuid + body)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePetOrderRequest' }
+      responses:
+        "200":
+          description: Order updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetOrderResponse' }
+
+  /pets/{id}/history:
+    get:
+      tags: [pets]
+      operationId: getPetOrderHistory
+      summary: Pet order history (path + query → consolidated RequestObject)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: size
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: History entries
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetOrderResponse' }
+
+  /pets/details:
+    get:
+      tags: [pets]
+      operationId: getPetDetails
+      summary: Returns pet details (allOf test)
+      responses:
+        "200":
+          description: Details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetDetails' }
+
+  /pets/status:
+    get:
+      tags: [pets]
+      operationId: getPetStatus
+      summary: Returns pet status (top-level enum as response type)
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetStatus' }
+
+  /pets/accounts:
+    post:
+      tags: [pets]
+      operationId: createPetAccount
+      summary: Create a pet account (header + body, no RequestObject)
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePetAccountRequest' }
+      responses:
+        "200":
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetOrderResponse' }
+
+  /pets/accounts/{accountId}/assets/{assetId}:
+    post:
+      tags: [pets]
+      operationId: createPetAccountAsset
+      summary: Create a pet account asset (path + path + header + body)
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePetAccountRequest' }
+      responses:
+        "200":
+          description: Asset created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetOrderResponse' }
+
+  # ─── TAG: store ───────────────────────────────────────────────────────────────
+
+  /store/items:
+    get:
+      tags: [store]
+      operationId: listStoreItems
+      summary: List store items
+      parameters:
+        - name: fromPet
+          in: query
+          required: true
+          schema: { type: string }
+        - name: toPet
+          in: query
+          required: true
+          schema: { type: string }
+        - name: amount
+          in: query
+          required: true
+          schema: { type: number, format: double }
+      responses:
+        "200":
+          description: Store items
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StoreItemResponse' }
+
+  # ─── TAG: order management (multi-word tag test) ─────────────────────────────
+
+  /order-management/report:
+    get:
+      tags: [order management]
+      operationId: getOrderReport
+      summary: Order management report (multi-word tag test)
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderReport' }
+
+  # ─── TAG: vets ────────────────────────────────────────────────────────────────
+
+  /vets/appointments:
+    get:
+      tags: [vets]
+      operationId: getVetAppointments
+      summary: Get vet appointments (query-only → useQueryMap)
+      parameters:
+        - name: vetId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: status
+          in: query
+          required: false
+          schema: { type: string }
+        - name: date
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Appointments
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentPage' }
+
+    post:
+      tags: [vets]
+      operationId: scheduleAppointment
+      summary: Schedule appointment (header + body, no RequestObject)
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScheduleAppointmentRequest' }
+      responses:
+        "200":
+          description: Appointment scheduled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentResponse' }
+
+  /vets/procedures:
+    get:
+      tags: [vets]
+      operationId: listVetProcedures
+      summary: List vet procedures (query + header → useQueryMap, no RequestObject)
+      parameters:
+        - name: specialtyId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: procedureName
+          in: query
+          required: false
+          schema: { type: string }
+        - name: duration
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Procedures
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VetProceduresResponse' }
+
+  /vets/{vetId}:
+    get:
+      tags: [vets]
+      operationId: getVetById
+      summary: Get vet profile (nested schema test)
+      parameters:
+        - name: vetId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Vet profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VetProfile' }
+
+  /vets/{vetId}/checkups/{petId}:
+    post:
+      tags: [vets]
+      operationId: scheduleCheckup
+      summary: Schedule checkup (path + 2 headers + body, no RequestObject)
+      parameters:
+        - name: vetId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: petId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string }
+        - name: X-Vet-License-Id
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CheckupRequest' }
+      responses:
+        "200":
+          description: Checkup scheduled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentResponse' }
+
+  /vets/{vetId}/records:
+    get:
+      tags: [vets]
+      operationId: getVetMedicalRecords
+      summary: Get vet medical records (response DTOs name collision test)
+      parameters:
+        - name: vetId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Medical records
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VetMedicalRecordsResponse' }
+
+components:
+  schemas:
+
+    # ── Scalar-type aliases (must NOT generate classes) ──────────────────────
+
+    PetAvailability:
+      type: boolean
+      description: Whether a pet is available for adoption
+
+    VetLicenseCode:
+      type: string
+      description: A plain string alias with no enum values
+
+    # ── Shared enums ────────────────────────────────────────────────────────────
+
+    AnimalCategory:
+      type: string
+      enum: [MAMMAL, BIRD, REPTILE, FISH]
+
+    PetStatus:
+      type: string
+      description: Status of a pet in the adoption lifecycle
+      enum: [AVAILABLE, PENDING, ADOPTED, WITHDRAWN]
+
+    # ── Pets schemas ────────────────────────────────────────────────────────────
+
+    PetListResponse:
+      type: object
+      properties:
+        pets:
+          type: array
+          items:
+            $ref: '#/components/schemas/PetInfo'
+        total:
+          type: integer
+
+    PetInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        breed:
+          type: string
+        age:
+          type: integer
+        microchip:
+          type: string
+        category:
+          $ref: '#/components/schemas/AnimalCategory'
+        available:
+          $ref: '#/components/schemas/PetAvailability'
+        licenseCode:
+          $ref: '#/components/schemas/VetLicenseCode'
+
+    CreatePetOrderRequest:
+      type: object
+      required: [fromPet, toPet, amount]
+      properties:
+        fromPet:
+          type: string
+          description: Source pet identifier
+        toPet:
+          type: string
+          description: Target pet identifier
+        amount:
+          type: number
+          format: double
+        notes:
+          type: number
+          format: double
+
+    PetOrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+        status:
+          type: string
+        totalPrice:
+          type: number
+          format: double
+        completedAt:
+          type: string
+          format: date-time
+
+    CreatePetAccountRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: Account name
+        active:
+          type: boolean
+
+    PetBase:
+      type: object
+      description: Shared base fields for a pet record
+      properties:
+        petId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+          description: "Deprecated: Use registeredAt instead."
+
+    PetDetails:
+      type: object
+      description: Pet details (allOf test — inherits PetBase fields)
+      allOf:
+        - $ref: '#/components/schemas/PetBase'
+        - type: object
+          properties:
+            expiresAt:
+              type: string
+              format: date-time
+            price:
+              type: number
+              format: double
+          required:
+            - expiresAt
+
+    # ── Store schemas ─────────────────────────────────────────────────────────────
+
+    StoreItemResponse:
+      type: object
+      properties:
+        itemName:
+          type: string
+        price:
+          type: number
+          format: double
+        availableAt:
+          type: string
+          format: date-time
+        itemId:
+          type: string
+          format: uuid
+        category:
+          $ref: '#/components/schemas/AnimalCategory'
+
+    # ── Order management schemas ─────────────────────────────────────────────────
+
+    OrderReport:
+      type: object
+      properties:
+        order_type:
+          type: string
+          enum: [SALE, TRANSFER, ADOPTION]
+        currency_unit:
+          type: string
+          enum: [USD, EUR, GBP]
+
+    # ── Vets schemas ──────────────────────────────────────────────────────────────
+
+    AppointmentSummary:
+      type: object
+      properties:
+        vetName:
+          type: string
+        petName:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+
+    AppointmentPage:
+      type: object
+      properties:
+        appointments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentSummary'
+        total:
+          type: integer
+        nextPage:
+          type: string
+
+    VetProfile:
+      type: object
+      properties:
+        vetId:
+          type: string
+        name:
+          type: string
+        specialty:
+          type: string
+        appointments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentSummary'
+
+    ScheduleAppointmentRequest:
+      type: object
+      required: [petId, vetId]
+      properties:
+        petId:
+          type: string
+          description: Pet to schedule appointment for
+        vetId:
+          type: string
+          description: Vet to schedule with
+        notes:
+          type: string
+
+    AppointmentResponse:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+
+    CheckupRequest:
+      type: object
+      required: [procedureCode]
+      properties:
+        procedureCode:
+          type: string
+          description: Procedure to perform during checkup
+        notes:
+          type: string
+        urgent:
+          type: boolean
+
+    VetProceduresResponse:
+      type: object
+      properties:
+        procedures:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+        total:
+          type: integer
+
+    MedicalRecord:
+      type: object
+      properties:
+        recordId:
+          type: string
+        diagnosis:
+          type: string
+        treatedAt:
+          type: string
+          format: date-time
+
+    Prescription:
+      type: object
+      properties:
+        prescriptionId:
+          type: string
+        medication:
+          type: string
+        dosage:
+          type: string
+
+    VetMedicalRecordsResponse:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalRecord'
+        prescriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prescription'

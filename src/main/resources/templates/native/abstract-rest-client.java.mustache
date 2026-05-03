@@ -1,0 +1,117 @@
+package {{package}};
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
+public abstract class AbstractRestClient {
+
+    protected final HttpClient   http;
+    protected final ObjectMapper mapper;
+    private   final String       baseUrl;
+    private   final String       apiKey;
+    private   final String       authHeaderName;
+
+    protected AbstractRestClient(HttpClient http, ObjectMapper mapper,
+                                  String baseUrl, String apiKey, String authHeaderName) {
+        this.http           = http;
+        this.mapper         = mapper;
+        this.baseUrl        = baseUrl;
+        this.apiKey         = apiKey;
+        this.authHeaderName = authHeaderName;
+    }
+
+    protected <T> T execute(String httpMethod, String path,
+                             Map<String, String> pathVars,
+                             Object queryObject,
+                             Object body,
+                             Class<T> responseType) {
+        try {
+            String url = buildUrl(path, pathVars, queryObject);
+            HttpRequest req = buildRequest(httpMethod, url, body);
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+            if (Void.class.equals(responseType)) return null;
+            return mapper.readValue(resp.body(), responseType);
+        } catch (java.io.IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected <T> List<T> executeList(String httpMethod, String path,
+                                       Map<String, String> pathVars,
+                                       Object queryObject,
+                                       Object body,
+                                       Class<T> itemType) {
+        try {
+            String url = buildUrl(path, pathVars, queryObject);
+            HttpRequest req = buildRequest(httpMethod, url, body);
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+            return mapper.readValue(resp.body(),
+                    mapper.getTypeFactory().constructCollectionType(List.class, itemType));
+        } catch (java.io.IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected static Map<String, Object> queryParams(Object... keysAndValues) {
+        Map<String, Object> m = new java.util.LinkedHashMap<>();
+        for (int i = 0; i + 1 < keysAndValues.length; i += 2) {
+            if (keysAndValues[i + 1] != null) m.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+        return m;
+    }
+
+    private String buildUrl(String path, Map<String, String> pathVars, Object queryObject) {
+        String url = baseUrl + path;
+        if (pathVars != null && !pathVars.isEmpty()) {
+            for (Map.Entry<String, String> e : pathVars.entrySet()) {
+                url = url.replace("{" + e.getKey() + "}",
+                        URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8));
+            }
+        }
+        if (queryObject != null) {
+            String qs = toQueryString(queryObject);
+            if (!qs.isEmpty()) url = url + "?" + qs;
+        }
+        return url;
+    }
+
+    private HttpRequest buildRequest(String httpMethod, String url, Object body)
+            throws java.io.IOException {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .header(authHeaderName, apiKey);
+        if (body != null) {
+            String json = mapper.writeValueAsString(body);
+            builder.method(httpMethod, HttpRequest.BodyPublishers.ofString(json));
+        } else {
+            builder.method(httpMethod, HttpRequest.BodyPublishers.noBody());
+        }
+        return builder.build();
+    }
+
+    private String toQueryString(Object obj) {
+        try {
+            Map<String, Object> map = mapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, Object> e : map.entrySet()) {
+                if (e.getValue() == null) continue;
+                if (sb.length() > 0) sb.append("&");
+                sb.append(URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8));
+                sb.append("=");
+                sb.append(URLEncoder.encode(String.valueOf(e.getValue()), StandardCharsets.UTF_8));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

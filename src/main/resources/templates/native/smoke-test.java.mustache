@@ -1,0 +1,47 @@
+package {{package}};
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+{{#imports}}
+{{{.}}}
+{{/imports}}
+import java.net.http.HttpClient;
+import java.time.Duration;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@Tag("integration")
+class {{className}} {
+
+    private static final String BASE_URL = "https://your-api-base-url";
+    private static final String API_KEY  = "your-api-key";
+
+    private {{clientClassName}} client;
+
+    @BeforeEach
+    void setUp() {
+        HttpClient http = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+
+        ObjectMapper mapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        client = new {{clientClassName}}(http, mapper, BASE_URL, API_KEY);
+    }
+{{#methods}}
+
+    @Test
+    void {{methodName}}_smokeTest() {
+        {{#hasReturn}}{{returnType}} resp = {{/hasReturn}}client.{{methodName}}({{callArgs}});
+        {{#hasReturn}}assertNotNull(resp, "{{methodName}} response must not be null");{{/hasReturn}}
+    }
+{{/methods}}
+}

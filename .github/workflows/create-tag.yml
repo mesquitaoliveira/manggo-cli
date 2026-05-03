@@ -1,0 +1,52 @@
+name: Create Tag on main merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-tag:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      created: ${{ steps.tag.outputs.created }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version and create tag
+        id: tag
+        run: |
+          VERSION=$(grep -m1 '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/')
+          TAG="v$VERSION"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "⚠️  Tag $TAG already exists. Bump version in pom.xml."
+            echo "created=false" >> $GITHUB_OUTPUT
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "✅ Created and pushed tag $TAG"
+            echo "created=true" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    name: Deploy
+    needs: create-tag
+    if: needs.create-tag.outputs.created == 'true'
+    permissions:
+      contents: write
+      packages: write
+    uses: ./.github/workflows/build-and-deploy.yml
+    with:
+      tag_name: ${{ needs.create-tag.outputs.tag }}
+    secrets: inherit

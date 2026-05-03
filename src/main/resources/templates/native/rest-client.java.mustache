@@ -1,0 +1,74 @@
+package {{package}};
+
+import javax.annotation.Nonnull;
+import {{commonPackage}}.BaseRestClient;
+import java.net.http.HttpClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+{{#imports}}
+{{.}}
+{{/imports}}
+
+public class {{className}} extends BaseRestClient implements {{parentInterface}} {
+
+    public {{className}}(HttpClient http, ObjectMapper mapper, String baseUrl, String apiKey) {
+        super(http, mapper, baseUrl, "{{authHeaderName}}", apiKey);
+    }
+
+{{#methods}}
+    @Override
+    public {{returnType}} {{methodName}}({{params}}) {
+        String _url = baseUrl + "{{path}}";
+{{#pathParams}}
+        _url = _url.replace("{{bracketName}}", String.valueOf({{accessExpr}}));
+{{/pathParams}}
+{{#isQueryMap}}
+        _url = _url + "?" + toQueryString(request);
+{{/isQueryMap}}
+{{#hasQueryParams}}
+        StringBuilder _qs = new StringBuilder();
+{{#queryParams}}
+{{#first}}
+        _qs.append("{{name}}=").append(java.net.URLEncoder.encode(parameterToString({{accessExpr}}), java.nio.charset.StandardCharsets.UTF_8));
+{{/first}}
+{{^first}}
+        _qs.append("&{{name}}=").append(java.net.URLEncoder.encode(String.valueOf({{accessExpr}}), java.nio.charset.StandardCharsets.UTF_8));
+{{/first}}
+{{/queryParams}}
+        _url = _url + "?" + _qs;
+{{/hasQueryParams}}
+{{#hasHeaderParams}}
+        java.util.Map<String, String> _headers = new java.util.LinkedHashMap<>();
+{{#headerParams}}
+        _headers.put("{{headerName}}", String.valueOf({{accessExpr}}));
+{{/headerParams}}
+{{/hasHeaderParams}}
+{{#hasReturn}}
+{{#isList}}
+{{#hasHeaderParams}}
+        return invokeAPIList(_url, "{{httpMethod}}", {{#hasBody}}request{{/hasBody}}{{^hasBody}}null{{/hasBody}}, _headers, {{listInnerType}}.class);
+{{/hasHeaderParams}}
+{{^hasHeaderParams}}
+        return invokeAPIList(_url, "{{httpMethod}}", {{#hasBody}}request{{/hasBody}}{{^hasBody}}null{{/hasBody}}, {{listInnerType}}.class);
+{{/hasHeaderParams}}
+{{/isList}}
+{{^isList}}
+{{#hasHeaderParams}}
+        return invokeAPI(_url, "{{httpMethod}}", {{#hasBody}}request{{/hasBody}}{{^hasBody}}null{{/hasBody}}, _headers, {{returnType}}.class);
+{{/hasHeaderParams}}
+{{^hasHeaderParams}}
+        return invokeAPI(_url, "{{httpMethod}}", {{#hasBody}}request{{/hasBody}}{{^hasBody}}null{{/hasBody}}, {{returnType}}.class);
+{{/hasHeaderParams}}
+{{/isList}}
+{{/hasReturn}}
+{{^hasReturn}}
+{{#hasHeaderParams}}
+        invokeAPIVoid(_url, "{{httpMethod}}", {{#hasBody}}request{{/hasBody}}{{^hasBody}}null{{/hasBody}}, _headers);
+{{/hasHeaderParams}}
+{{^hasHeaderParams}}
+        invokeAPIVoid(_url, "{{httpMethod}}", {{#hasBody}}request{{/hasBody}}{{^hasBody}}null{{/hasBody}});
+{{/hasHeaderParams}}
+{{/hasReturn}}
+    }
+
+{{/methods}}
+}

@@ -1,0 +1,117 @@
+openapi: "3.0.3"
+info:
+  title: OneOf Schema Test API
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com
+
+paths:
+  /patterns:
+    get:
+      tags:
+        - patterns
+      operationId: getPattern
+      summary: Returns a container with both oneOf patterns
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternWrapper'
+
+  /ota/status:
+    put:
+      tags:
+        - patterns
+      operationId: setOtaStatus
+      summary: Returns oneOf[object, string] directly
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtaStatusResponse'
+
+components:
+  schemas:
+    InitiatorConfig:
+      type: object
+      properties:
+        userId:
+          type: string
+        accountId:
+          type: string
+
+    # Pattern A: oneOf [string-enum-wildcard, $ref] — no inline object branch
+    # → Pass 3 merges $ref properties → class generated with userId + accountId
+    InitiatorConfigPattern:
+      oneOf:
+        - type: string
+          enum: ['*']
+        - $ref: '#/components/schemas/InitiatorConfig'
+
+    # Pattern B: oneOf [object-with-props, primitive]
+    # → Pass 1 extracts inline object branch → class generated with message field
+    OtaStatusResponse:
+      oneOf:
+        - type: object
+          properties:
+            message:
+              type: string
+        - type: string
+
+    # Pattern C: oneOf [string-enum, $ref-to-object-with-properties]
+    # → mirrors ContractMethodPattern from real specs
+    # → Pass 3 merges ContractMethodConfig properties
+    ContractMethodConfig:
+      type: object
+      properties:
+        methodCalls:
+          type: array
+          items:
+            type: string
+        operator:
+          type: string
+          enum:
+            - EITHER
+            - EXACT
+      required:
+        - methodCalls
+        - operator
+
+    ContractMethodPattern:
+      oneOf:
+        - type: string
+          enum:
+            - '*'
+        - $ref: '#/components/schemas/ContractMethodConfig'
+
+    # Pattern D: anyOf [$ref] — no inline properties
+    # → Pass 3 merges AnyOfConfig properties
+    AnyOfConfig:
+      type: object
+      properties:
+        currency:
+          type: string
+        amount:
+          type: number
+
+    AnyOfPattern:
+      anyOf:
+        - $ref: '#/components/schemas/AnyOfConfig'
+
+    PatternWrapper:
+      type: object
+      properties:
+        name:
+          type: string
+        pattern:
+          $ref: '#/components/schemas/InitiatorConfigPattern'
+        status:
+          $ref: '#/components/schemas/OtaStatusResponse'
+        contractMethod:
+          $ref: '#/components/schemas/ContractMethodPattern'
+        anyOfValue:
+          $ref: '#/components/schemas/AnyOfPattern'

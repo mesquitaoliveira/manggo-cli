@@ -1,0 +1,16 @@
+package {{package}};
+
+import feign.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+@Component
+public class {{className}} extends Logger {
+    private static final org.slf4j.Logger log =
+        LoggerFactory.getLogger({{className}}.class);
+
+    @Override
+    protected void log(String configKey, String format, Object... args) {
+        log.info("[{{pascalUpper}}] " + format, args);
+    }
+}

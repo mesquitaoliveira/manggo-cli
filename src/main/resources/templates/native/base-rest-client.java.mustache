@@ -1,0 +1,113 @@
+package {{package}};
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Map;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public abstract class BaseRestClient {
+
+    protected final HttpClient http;
+    protected final ObjectMapper mapper;
+    protected final String baseUrl;
+    private final String authHeaderName;
+    private final String apiKey;
+
+    protected BaseRestClient(HttpClient http, ObjectMapper mapper, String baseUrl, String authHeaderName, String apiKey) {
+        this.http = http;
+        this.mapper = mapper;
+        this.baseUrl = baseUrl;
+        this.authHeaderName = authHeaderName;
+        this.apiKey = apiKey;
+    }
+
+    protected <T> T invokeAPI(String url, String method, Object body, Class<T> returnType) {
+        return invokeAPI(url, method, body, Map.of(), returnType);
+    }
+
+    protected <T> T invokeAPI(String url, String method, Object body, Map<String, String> extraHeaders, Class<T> returnType) {
+        try {
+            HttpResponse<String> resp = http.send(buildRequest(url, method, body, extraHeaders), HttpResponse.BodyHandlers.ofString());
+            return mapper.readValue(resp.body(), returnType);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected <T> List<T> invokeAPIList(String url, String method, Object body, Class<T> itemType) {
+        return invokeAPIList(url, method, body, Map.of(), itemType);
+    }
+
+    protected <T> List<T> invokeAPIList(String url, String method, Object body, Map<String, String> extraHeaders, Class<T> itemType) {
+        try {
+            HttpResponse<String> resp = http.send(buildRequest(url, method, body, extraHeaders), HttpResponse.BodyHandlers.ofString());
+            return mapper.readValue(resp.body(),
+                    mapper.getTypeFactory().constructCollectionType(List.class, itemType));
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void invokeAPIVoid(String url, String method, Object body) {
+        invokeAPIVoid(url, method, body, Map.of());
+    }
+
+    protected void invokeAPIVoid(String url, String method, Object body, Map<String, String> extraHeaders) {
+        try {
+            http.send(buildRequest(url, method, body, extraHeaders), HttpResponse.BodyHandlers.discarding());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private HttpRequest buildRequest(String url, String method, Object body, Map<String, String> extraHeaders) throws IOException {
+        String bodyStr = body != null ? mapper.writeValueAsString(body) : null;
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .header(authHeaderName, apiKey)
+                .method(method, bodyStr != null
+                        ? HttpRequest.BodyPublishers.ofString(bodyStr)
+                        : HttpRequest.BodyPublishers.noBody());
+        extraHeaders.forEach(builder::header);
+        return builder.build();
+    }
+
+    protected String toQueryString(Object obj) {
+        try {
+            java.util.Map<String, Object> map = mapper.convertValue(obj, new TypeReference<java.util.Map<String, Object>>() {});
+            StringBuilder sb = new StringBuilder();
+            for (java.util.Map.Entry<String, Object> e : map.entrySet()) {
+                if (e.getValue() == null) continue;
+                if (sb.length() > 0) sb.append("&");
+                sb.append(java.net.URLEncoder.encode(e.getKey(), java.nio.charset.StandardCharsets.UTF_8));
+                sb.append("=");
+                sb.append(java.net.URLEncoder.encode(parameterToString(e.getValue()), java.nio.charset.StandardCharsets.UTF_8));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected String parameterToString(Object param) {
+        if (param == null) return "";
+        if (param instanceof java.util.Collection) {
+            StringBuilder sb = new StringBuilder();
+            for (Object item : (java.util.Collection<?>) param) {
+                if (sb.length() > 0) sb.append(",");
+                sb.append(String.valueOf(item));
+            }
+            return sb.toString();
+        }
+        if (param instanceof java.time.OffsetDateTime) {
+            return java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME.format((java.time.OffsetDateTime) param);
+        }
+        return String.valueOf(param);
+    }
+}

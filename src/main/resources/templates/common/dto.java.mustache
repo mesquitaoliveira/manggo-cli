@@ -1,0 +1,33 @@
+package {{package}};
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import {{apiModelImport}};
+{{#imports}}
+{{.}}
+{{/imports}}
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class {{className}} extends ApiModel {
+
+{{#fields}}
+{{#description}}
+    /** {{description}} */
+{{/description}}
+{{#deprecated}}
+    @Deprecated
+{{/deprecated}}
+    @JsonProperty("{{name}}")
+    private {{javaType}} {{fieldName}};
+
+{{/fields}}
+{{#fields}}
+    public {{javaType}} get{{capitalizedName}}() {
+        return {{fieldName}};
+    }
+
+    public void set{{capitalizedName}}({{javaType}} {{fieldName}}) {
+        this.{{fieldName}} = {{fieldName}};
+    }
+{{/fields}}
+}

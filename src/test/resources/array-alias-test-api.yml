@@ -1,0 +1,68 @@
+openapi: "3.0.3"
+info:
+  title: Array Alias Test API
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com
+
+paths:
+  /widgets:
+    get:
+      tags:
+        - widgets
+      operationId: getContainer
+      summary: Returns a container with nested array alias fields
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Container'
+  /widgets/{id}/groups:
+    get:
+      tags:
+        - widgets
+      operationId: getGroups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemList'
+
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: integer
+
+    # Array-alias: represents List<Item> — no class should be generated
+    ItemList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Item'
+
+    # Container has a property typed as array of ItemList:
+    #   items: type: array, items: $ref: ItemList
+    # → after alias resolution: List<List<Item>>
+    Container:
+      type: object
+      properties:
+        name:
+          type: string
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemList'

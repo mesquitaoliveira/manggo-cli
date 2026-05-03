@@ -1,0 +1,55 @@
+package {{package}};
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import feign.Feign;
+import feign.Request;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
+import feign.httpclient.ApacheHttpClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+{{#imports}}
+{{{.}}}
+{{/imports}}
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@Tag("integration")
+class {{className}} {
+
+    private static final String BASE_URL = "https://your-api-base-url";
+    private static final String API_KEY  = "your-api-key";
+
+    private {{restInterface}} client;
+
+    @BeforeEach
+    void setUp() {
+        ObjectMapper mapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        client = Feign.builder()
+                .client(new ApacheHttpClient())
+                .encoder(new JacksonEncoder(mapper))
+                .decoder(new JacksonDecoder(mapper))
+                .requestInterceptor(t -> t.header("{{authHeaderName}}", API_KEY))
+                .options(new Request.Options(5, TimeUnit.SECONDS, 30, TimeUnit.SECONDS, true))
+                .target({{clientClassName}}.class, BASE_URL);
+    }
+{{#methods}}
+
+    @Test
+    {{#disabled}}@Disabled("requires a non-null request body — populate before enabling")
+    {{/disabled}}void {{methodName}}_smokeTest() {
+        {{#hasReturn}}{{returnType}} resp = {{/hasReturn}}client.{{methodName}}({{callArgs}});
+        {{#hasReturn}}assertNotNull(resp, "{{methodName}} response must not be null");{{/hasReturn}}
+    }
+{{/methods}}
+}

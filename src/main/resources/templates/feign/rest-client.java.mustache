@@ -1,0 +1,22 @@
+package {{package}};
+
+import feign.Headers;
+import feign.RequestLine;
+import javax.annotation.Nonnull;
+{{#imports}}
+{{.}}
+{{/imports}}
+
+public interface {{className}} extends {{parentInterface}} {
+
+{{#methods}}
+    @Override
+    @RequestLine("{{requestLine}}")
+    @Headers({{headers}})
+{{#hasReturn}}
+    @Nonnull
+{{/hasReturn}}
+    {{returnType}} {{methodName}}({{params}});
+
+{{/methods}}
+}
