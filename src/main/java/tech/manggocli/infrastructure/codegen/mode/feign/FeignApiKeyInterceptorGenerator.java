@@ -3,7 +3,7 @@ package tech.manggocli.infrastructure.codegen.mode.feign;
 import tech.manggocli.infrastructure.codegen.layout.PackageNames;
 import tech.manggocli.infrastructure.codegen.layout.Templates;
 import tech.manggocli.infrastructure.codegen.shared.TemplateRenderer;
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.client.ClientSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

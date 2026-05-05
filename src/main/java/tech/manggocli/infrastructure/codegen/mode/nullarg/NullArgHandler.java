@@ -1,6 +1,6 @@
 package tech.manggocli.infrastructure.codegen.mode.nullarg;
 
-import tech.manggocli.core.domain.api.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
 
 import java.util.Collections;
 import java.util.List;

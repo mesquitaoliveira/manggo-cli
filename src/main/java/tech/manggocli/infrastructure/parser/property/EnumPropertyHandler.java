@@ -1,6 +1,6 @@
 package tech.manggocli.infrastructure.parser.property;
 
-import static tech.manggocli.core.domain.service.NamingService.toValidJavaClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.toValidJavaClassName;
 
 /**
  * Pattern: Chain of Responsibility (Concrete Handler)

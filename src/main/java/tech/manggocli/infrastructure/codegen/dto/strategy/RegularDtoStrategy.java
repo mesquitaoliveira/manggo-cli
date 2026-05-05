@@ -7,7 +7,7 @@ import tech.manggocli.infrastructure.codegen.dto.DtoGenerationContext;
 import tech.manggocli.infrastructure.codegen.dto.DtoGenerationStrategy;
 import tech.manggocli.infrastructure.codegen.dto.builder.DtoImportsCollector;
 import tech.manggocli.infrastructure.codegen.dto.builder.FieldMapper;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,7 +21,7 @@ import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.mainSourc
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.writeJavaFile;
 
 /**
- * Writes a single OBJECT or MISSING schema node produced by SchemaDependencyWalker.
+ * Writes a single OBJECT or MISSING schema node produced by SchemaGraphResolver.
  * Package (request vs response) comes from ctx.isRequest(), set by the orchestrator
  * based on the walker node's isRequest flag.
  */

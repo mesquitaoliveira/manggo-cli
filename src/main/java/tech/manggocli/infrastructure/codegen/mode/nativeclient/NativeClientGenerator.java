@@ -1,12 +1,14 @@
-package tech.manggocli.infrastructure.codegen.mode.httpclient;
+package tech.manggocli.infrastructure.codegen.mode.nativeclient;
 
 import tech.manggocli.core.application.port.UserNotifier;
+import tech.manggocli.infrastructure.codegen.layout.Templates;
+import tech.manggocli.infrastructure.codegen.mode.ProjectScaffoldingGenerator;
 import tech.manggocli.infrastructure.codegen.shared.RestInterfaceGenerator;
 import tech.manggocli.infrastructure.codegen.shared.TagCodeGenerator;
 import tech.manggocli.infrastructure.codegen.mode.AbstractClientGenerator;
 import tech.manggocli.infrastructure.codegen.shared.ApiModelGenerator;
 import tech.manggocli.infrastructure.codegen.shared.DtoGenerator;
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.client.ClientSpec;
 import tech.manggocli.core.domain.api.ParsedApi;
 
 import java.io.IOException;
@@ -29,7 +31,8 @@ public class NativeClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected void generateProjectStructure(final String basePackage, final Path projectRoot) throws IOException {
-        new NativeProjectPomGenerator(projectRoot).generate(basePackage);
+        new ProjectScaffoldingGenerator(projectRoot, Templates.NATIVE_POM, "-native-client", "native-client")
+                .generate(basePackage);
     }
 
     @Override
@@ -68,6 +71,5 @@ public class NativeClientGenerator extends AbstractClientGenerator {
             final UserNotifier notifier) throws IOException {
 
         new NativeClientConfigurationGenerator(basePackage, projectRoot, notifier).generate(api, spec);
-        notifier.notifyFileGenerated(spec.getClientNamePascal() + "ClientConfiguration");
     }
 }

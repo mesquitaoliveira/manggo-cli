@@ -1,8 +1,8 @@
 package tech.manggocli.infrastructure.codegen.shared;
 
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiParameter;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiParameter;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 import tech.manggocli.core.domain.service.OperationTypeResolver;
 import tech.manggocli.infrastructure.codegen.layout.PackageNames;
 

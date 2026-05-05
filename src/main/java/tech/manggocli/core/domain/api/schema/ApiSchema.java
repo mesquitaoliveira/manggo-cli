@@ -1,4 +1,4 @@
-package tech.manggocli.core.domain.api;
+package tech.manggocli.core.domain.api.schema;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

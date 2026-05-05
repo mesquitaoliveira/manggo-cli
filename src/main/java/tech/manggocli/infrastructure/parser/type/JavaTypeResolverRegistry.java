@@ -19,12 +19,12 @@ public final class JavaTypeResolverRegistry {
 
     public JavaTypeResolverRegistry() {
         final Map<String, JavaTypeResolver> map = new LinkedHashMap<>();
-        map.put("string",  new StringTypeResolver());
+        map.put("string", new StringTypeResolver());
         map.put("integer", new IntegerTypeResolver());
-        map.put("number",  new NumberTypeResolver());
+        map.put("number", new NumberTypeResolver());
         map.put("boolean", new BooleanTypeResolver());
-        map.put("array",   new ArrayTypeResolver());
-        map.put("object",  new ObjectTypeResolver());
+        map.put("array", new ArrayTypeResolver());
+        map.put("object", new ObjectTypeResolver());
         this.resolvers = Collections.unmodifiableMap(map);
     }
 

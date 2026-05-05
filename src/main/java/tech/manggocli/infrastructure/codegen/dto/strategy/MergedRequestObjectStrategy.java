@@ -1,8 +1,8 @@
 package tech.manggocli.infrastructure.codegen.dto.strategy;
 
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiParameter;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiParameter;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 import tech.manggocli.infrastructure.codegen.dto.DtoGenerationContext;
 import tech.manggocli.infrastructure.codegen.dto.DtoGenerationStrategy;
 import tech.manggocli.infrastructure.codegen.dto.builder.DtoImportsCollector;
@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static tech.manggocli.core.domain.service.NamingService.capitalize;
+import static tech.manggocli.core.domain.service.JavaNames.capitalize;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.mainSourcePath;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.writeJavaFile;
 

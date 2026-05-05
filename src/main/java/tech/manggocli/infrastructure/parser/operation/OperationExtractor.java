@@ -1,6 +1,6 @@
 package tech.manggocli.infrastructure.parser.operation;
 
-import tech.manggocli.core.domain.api.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
 import tech.manggocli.core.domain.api.ParsedApi;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -75,7 +75,7 @@ public final class OperationExtractor {
                     && op.getRequestBodySchema() == null) {
                 op.setUseQueryMap(true);
             }
-            api.getOperations().add(op);
+            api.addOperation(op);
 
             log.debug("Op: {} {} [{}] tag={}", op.getHttpMethod(), path, op.getOperationId(), tag);
         });

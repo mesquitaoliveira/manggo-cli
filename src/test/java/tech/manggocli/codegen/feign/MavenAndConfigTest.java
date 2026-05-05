@@ -2,7 +2,7 @@ package tech.manggocli.codegen.feign;
 
 import tech.manggocli.core.application.port.UserNotifier;
 import tech.manggocli.infrastructure.codegen.mode.feign.FeignClientGenerator;
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.client.ClientSpec;
 import tech.manggocli.core.domain.api.ParsedApi;
 import tech.manggocli.support.FeignGeneratorTestBase;
 import org.junit.jupiter.api.Test;

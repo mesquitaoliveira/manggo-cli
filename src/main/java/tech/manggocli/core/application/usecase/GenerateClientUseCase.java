@@ -6,7 +6,7 @@ import tech.manggocli.core.application.exception.InvalidModeException;
 import tech.manggocli.core.application.port.UserNotifier;
 import tech.manggocli.core.application.strategy.ClientGeneratorRegistry;
 import tech.manggocli.core.application.strategy.ClientGeneratorStrategy;
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.client.ClientSpec;
 import tech.manggocli.core.domain.api.ParsedApi;
 import tech.manggocli.infrastructure.parser.OpenApiParser;
 

@@ -1,6 +1,6 @@
 package tech.manggocli.domain;
 
-import tech.manggocli.core.domain.service.NamingService;
+import tech.manggocli.core.domain.service.JavaNames;
 import tech.manggocli.support.FeignGeneratorTestBase;
 import org.junit.jupiter.api.Test;
 
@@ -13,12 +13,12 @@ class CamelCaseTest extends FeignGeneratorTestBase {
     private static final String BASE      = "com/example/" + CLIENT + "/";
 
     @Test void snakeCaseToCamelCase() {
-        assertEquals("getV1ApiBlockchain",     NamingService.toCamelCase("get_v1_api_blockchain"));
-        assertEquals("getBlockchainById",       NamingService.toCamelCase("get_blockchain_by_id"));
-        assertEquals("getAllTokens",            NamingService.toCamelCase("get-all-tokens"));
-        assertEquals("getVaultById",            NamingService.toCamelCase("GetVaultById"));
-        assertEquals("getTokens",               NamingService.toCamelCase("getTokens"));
-        assertEquals("createVaultAccountAsset", NamingService.toCamelCase("createVaultAccountAsset"));
+        assertEquals("getV1ApiBlockchain",     JavaNames.toCamelCase("get_v1_api_blockchain"));
+        assertEquals("getBlockchainById",       JavaNames.toCamelCase("get_blockchain_by_id"));
+        assertEquals("getAllTokens",            JavaNames.toCamelCase("get-all-tokens"));
+        assertEquals("getVaultById",            JavaNames.toCamelCase("GetVaultById"));
+        assertEquals("getTokens",               JavaNames.toCamelCase("getTokens"));
+        assertEquals("createVaultAccountAsset", JavaNames.toCamelCase("createVaultAccountAsset"));
     }
 
     @Test void generatedInterfaceShouldHaveCamelCaseMethods() throws Exception {

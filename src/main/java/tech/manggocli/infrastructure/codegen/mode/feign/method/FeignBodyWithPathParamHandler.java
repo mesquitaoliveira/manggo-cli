@@ -1,6 +1,6 @@
 package tech.manggocli.infrastructure.codegen.mode.feign.method;
 
-import tech.manggocli.core.domain.api.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
 import tech.manggocli.infrastructure.codegen.mode.MethodParamHandler;
 
 import java.util.ArrayList;

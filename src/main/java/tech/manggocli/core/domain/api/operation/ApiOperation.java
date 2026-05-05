@@ -1,35 +1,32 @@
-package tech.manggocli.core.domain.api;
+package tech.manggocli.core.domain.api.operation;
 
-import tech.manggocli.core.domain.service.NamingService;
+import tech.manggocli.core.domain.service.JavaNames;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.util.Optional.ofNullable;
-import static java.util.regex.Pattern.compile;
 
 /**
- * Represents a single HTTP operation from the OpenAPI spec.
- * <p>
- * Parameter strategy:
- * <p>
- * CASE 1 — Query params only, no body, no path (headers are separate @Param)
- * → useQueryMap=true  → generates QueryMap DTO with constructor
- * <p>
- * CASE 2 — Body only (requestBodySchema), no mixed params
- * → individual path params + body as argument
- * <p>
- * CASE 3 — Mix: path + header + body  OR  path + header without body
- * → needsRequestObject=true
- * → generates {OperationName}Request consolidating all params
- * with @JsonProperty for body and constructors for ease of use
- * → AVOIDS multiple loose @Param that cause "Method does not override"
- * <p>
- * CASE 4 — Path params only + no header + normal body
- * → individual @Param path params + separate body (safe)
+ * A single HTTP operation parsed from an OpenAPI spec.
+ *
+ * <h3>Parameter strategy (decided by the parser, applied here)</h3>
+ * <ul>
+ *   <li><b>CASE 1</b> — query params only, no body, no path → {@link #useQueryMap}=true.
+ *       A QueryMap DTO is generated.</li>
+ *   <li><b>CASE 2</b> — body only, no mixed params → individual path params + body.</li>
+ *   <li><b>CASE 3</b> — path + header + body, or path + header without body → {@link #needsRequestObject()}=true.
+ *       A {OperationName}Request consolidates everything (avoids loose @Param overrides).</li>
+ *   <li><b>CASE 4</b> — path params only, no header, normal body → individual @Param + separate body.</li>
+ * </ul>
  */
 public class ApiOperation {
+
+    private static final Pattern PATH_PARAM_BRACES = Pattern.compile("\\{([^}]+)}");
+    private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^a-zA-Z0-9]+");
+    private static final Pattern TRIM_UNDERSCORE = Pattern.compile("^_|_$");
+    private static final String REQUEST_SUFFIX = "Request";
 
     private String tag;
     private String operationId;
@@ -37,22 +34,39 @@ public class ApiOperation {
     private String path;
     private String summary;
 
-    private static final Pattern PATH_PARAM = compile("\\{([^}]+)}");
-    private static final Pattern NON_ALPHANUMERIC_PATTERN = compile("[^a-zA-Z0-9]+");
-
-    private static final Pattern TRIM_UNDERSCORE = compile("^_|_$");
-
     private List<ApiParameter> queryParams = new ArrayList<>();
     private List<ApiParameter> pathParams = new ArrayList<>();
     private List<ApiParameter> headerParams = new ArrayList<>();
 
     private String requestBodySchema;
-    private boolean useQueryMap;       // true: query params → @QueryMap com RequestObject
+    private boolean useQueryMap;
     private String responseSchema;
     private String consumes = "application/json";
     private String produces = "application/json";
 
-    // ─── Getters/Setters ─────────────────────────────────────────────────────
+    public boolean needsRequestObject() {
+        return !queryParams.isEmpty() && !pathParams.isEmpty();
+    }
+
+    public String getRequestObjectClassName() {
+        final String camel = JavaNames.toCamelCase(operationIdOrFallback());
+        return Character.toUpperCase(camel.charAt(0)) + camel.substring(1) + REQUEST_SUFFIX;
+    }
+
+    public String getMethodName() {
+        return JavaNames.toCamelCase(operationIdOrFallback());
+    }
+
+    private String operationIdOrFallback() {
+        return ofNullable(operationId).filter(s -> !s.isBlank()).orElseGet(this::buildFallbackName);
+    }
+
+    private String buildFallbackName() {
+        String sanitized = PATH_PARAM_BRACES.matcher(path).replaceAll("$1");
+        sanitized = NON_ALPHANUMERIC.matcher(sanitized).replaceAll("_");
+        sanitized = TRIM_UNDERSCORE.matcher(sanitized).replaceAll("");
+        return httpMethod.toLowerCase() + "_" + sanitized;
+    }
 
     public String getTag() {
         return tag;
@@ -156,31 +170,5 @@ public class ApiOperation {
 
     public void setProduces(final String p) {
         this.produces = p;
-    }
-
-    public boolean needsRequestObject() {
-        return !queryParams.isEmpty() && !pathParams.isEmpty();
-    }
-
-    public String getRequestObjectClassName() {
-        final var base = ofNullable(operationId)
-                .filter(s -> !s.isBlank())
-                .orElseGet(this::buildFallbackName);
-        final var camel = NamingService.toCamelCase(base);
-        return Character.toUpperCase(camel.charAt(0)) + camel.substring(1) + "Request";
-    }
-
-    public String getMethodName() {
-        final var raw = ofNullable(operationId)
-                .filter(s -> !s.isBlank())
-                .orElseGet(this::buildFallbackName);
-        return NamingService.toCamelCase(raw);
-    }
-
-    private String buildFallbackName() {
-        var sanitized = PATH_PARAM.matcher(path).replaceAll("$1");
-        sanitized = NON_ALPHANUMERIC_PATTERN.matcher(sanitized).replaceAll("_");
-        sanitized = TRIM_UNDERSCORE.matcher(sanitized).replaceAll("");
-        return httpMethod.toLowerCase() + "_" + sanitized;
     }
 }

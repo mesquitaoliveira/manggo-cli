@@ -1,0 +1,3 @@
+tech.manggocli.infrastructure.codegen.mode.feign.FeignClientGenerator
+tech.manggocli.infrastructure.codegen.mode.feignhc5.FeignHc5ClientGenerator
+tech.manggocli.infrastructure.codegen.mode.nativeclient.NativeClientGenerator

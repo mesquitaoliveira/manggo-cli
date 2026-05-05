@@ -1,7 +1,7 @@
 package tech.manggocli.core.application.strategy;
 
 import tech.manggocli.core.application.port.UserNotifier;
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.client.ClientSpec;
 import tech.manggocli.core.domain.api.ParsedApi;
 
 import java.io.IOException;

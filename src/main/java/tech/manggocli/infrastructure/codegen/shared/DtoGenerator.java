@@ -2,8 +2,8 @@ package tech.manggocli.infrastructure.codegen.shared;
 
 import tech.manggocli.core.application.port.UserNotifier;
 import tech.manggocli.infrastructure.codegen.dto.DtoOrchestrator;
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 
 import java.io.IOException;
 import java.nio.file.Path;

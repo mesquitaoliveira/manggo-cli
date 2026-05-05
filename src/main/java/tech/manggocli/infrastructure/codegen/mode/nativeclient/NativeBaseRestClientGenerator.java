@@ -1,4 +1,4 @@
-package tech.manggocli.infrastructure.codegen.mode.httpclient;
+package tech.manggocli.infrastructure.codegen.mode.nativeclient;
 
 import tech.manggocli.infrastructure.codegen.layout.PackageNames;
 import tech.manggocli.infrastructure.codegen.layout.Templates;

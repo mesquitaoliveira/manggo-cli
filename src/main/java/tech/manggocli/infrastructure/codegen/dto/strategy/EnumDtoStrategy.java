@@ -5,7 +5,7 @@ import tech.manggocli.infrastructure.codegen.layout.Templates;
 import tech.manggocli.infrastructure.codegen.shared.TemplateRenderer;
 import tech.manggocli.infrastructure.codegen.dto.DtoGenerationContext;
 import tech.manggocli.infrastructure.codegen.dto.DtoGenerationStrategy;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.mainSourcePath;
-import static tech.manggocli.core.domain.service.NamingService.sanitizeEnumConstant;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.sanitizeEnumConstant;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.writeJavaFile;
 
 public class EnumDtoStrategy implements DtoGenerationStrategy {

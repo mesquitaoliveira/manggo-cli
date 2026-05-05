@@ -1,6 +1,6 @@
 package tech.manggocli.domain;
 
-import tech.manggocli.core.domain.service.NamingService;
+import tech.manggocli.core.domain.service.JavaIdentifiers;
 import tech.manggocli.support.FeignGeneratorTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,25 +16,25 @@ class JavaIdentifierTest extends FeignGeneratorTestBase {
     // ── toValidJavaClassName (unit) ───────────────────────────────────────────
 
     @Test void hyphenInSchemaNameBecomesCapitalizedChar() {
-        assertEquals("ItemInfo",                NamingService.toValidJavaClassName("Item-Info"));
-        assertEquals("PolicyVerdictActionEnum2", NamingService.toValidJavaClassName("PolicyVerdictActionEnum-2"));
-        assertEquals("MySchema",                NamingService.toValidJavaClassName("my schema"));
+        assertEquals("ItemInfo",                JavaIdentifiers.toValidJavaClassName("Item-Info"));
+        assertEquals("PolicyVerdictActionEnum2", JavaIdentifiers.toValidJavaClassName("PolicyVerdictActionEnum-2"));
+        assertEquals("MySchema",                JavaIdentifiers.toValidJavaClassName("my schema"));
     }
 
     @Test void schemaNameStartingWithDigitGetsPrefixed() {
-        assertEquals("S2FaAlgo", NamingService.toValidJavaClassName("2FaAlgo"));
+        assertEquals("S2FaAlgo", JavaIdentifiers.toValidJavaClassName("2FaAlgo"));
     }
 
     @Test void validSchemaNameIsUnchanged() {
-        assertEquals("VaultAccount", NamingService.toValidJavaClassName("VaultAccount"));
+        assertEquals("VaultAccount", JavaIdentifiers.toValidJavaClassName("VaultAccount"));
         assertEquals("CreateVaultAccountRequest",
-            NamingService.toValidJavaClassName("CreateVaultAccountRequest"));
+            JavaIdentifiers.toValidJavaClassName("CreateVaultAccountRequest"));
     }
 
     @Test void nullOrBlankSchemaNameReturnsUnknown() {
-        assertEquals("Unknown", NamingService.toValidJavaClassName(null));
-        assertEquals("Unknown", NamingService.toValidJavaClassName("   "));
-        assertEquals("Unknown", NamingService.toValidJavaClassName("---"));
+        assertEquals("Unknown", JavaIdentifiers.toValidJavaClassName(null));
+        assertEquals("Unknown", JavaIdentifiers.toValidJavaClassName("   "));
+        assertEquals("Unknown", JavaIdentifiers.toValidJavaClassName("---"));
     }
 
     // ── Enum constant sanitization (integration) ──────────────────────────────
@@ -100,22 +100,22 @@ class JavaIdentifierTest extends FeignGeneratorTestBase {
     // ── sanitizeEnumConstant (unit) ───────────────────────────────────────────
 
     @Test void starSymbolBecomesStar() {
-        assertEquals("STAR", NamingService.sanitizeEnumConstant("*"));
+        assertEquals("STAR", JavaIdentifiers.sanitizeEnumConstant("*"));
     }
 
     @Test void plusSymbolBecomesPlus() {
-        assertEquals("PLUS", NamingService.sanitizeEnumConstant("+"));
+        assertEquals("PLUS", JavaIdentifiers.sanitizeEnumConstant("+"));
     }
 
     @Test void regularEnumValueIsUnchanged() {
-        assertEquals("ALLOW",            NamingService.sanitizeEnumConstant("ALLOW"));
-        assertEquals("REQUIRE_APPROVAL", NamingService.sanitizeEnumConstant("REQUIRE_APPROVAL"));
-        assertEquals("PENDING_DONE",     NamingService.sanitizeEnumConstant("PENDING-DONE"));
+        assertEquals("ALLOW",            JavaIdentifiers.sanitizeEnumConstant("ALLOW"));
+        assertEquals("REQUIRE_APPROVAL", JavaIdentifiers.sanitizeEnumConstant("REQUIRE_APPROVAL"));
+        assertEquals("PENDING_DONE",     JavaIdentifiers.sanitizeEnumConstant("PENDING-DONE"));
     }
 
     @Test void nullOrBlankEnumValueReturnsUnknown() {
-        assertEquals("UNKNOWN", NamingService.sanitizeEnumConstant(null));
-        assertEquals("UNKNOWN", NamingService.sanitizeEnumConstant("   "));
+        assertEquals("UNKNOWN", JavaIdentifiers.sanitizeEnumConstant(null));
+        assertEquals("UNKNOWN", JavaIdentifiers.sanitizeEnumConstant("   "));
     }
 
     // ── Inline enum in property (integration) ────────────────────────────────

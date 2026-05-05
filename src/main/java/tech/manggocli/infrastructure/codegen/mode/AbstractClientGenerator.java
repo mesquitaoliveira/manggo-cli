@@ -2,10 +2,10 @@ package tech.manggocli.infrastructure.codegen.mode;
 
 import tech.manggocli.core.application.port.UserNotifier;
 import tech.manggocli.core.application.strategy.ClientGeneratorStrategy;
-import tech.manggocli.infrastructure.codegen.shared.TagCodeGenerator;
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ClientSpec;
 import tech.manggocli.core.domain.api.ParsedApi;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.client.ClientSpec;
+import tech.manggocli.infrastructure.codegen.shared.TagCodeGenerator;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -15,8 +15,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+
+import static java.lang.Runtime.getRuntime;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.stream.Collectors.toList;
 
 public abstract class AbstractClientGenerator implements ClientGeneratorStrategy {
 
@@ -40,10 +42,6 @@ public abstract class AbstractClientGenerator implements ClientGeneratorStrategy
         // 4. Client configuration (mode-specific)
         generateClientConfiguration(api, spec, basePackage, projectRoot, notifier);
     }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ── ABSTRACT HOOKS - Each mode implements as needed
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     /**
      * Generates the Maven project structure (pom.xml).
@@ -82,10 +80,6 @@ public abstract class AbstractClientGenerator implements ClientGeneratorStrategy
             Path projectRoot,
             UserNotifier notifier) throws IOException;
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ── COMMON LOGIC - Implemented once for all modes
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
     /**
      * Template Method: orchestrates parallel tag artifact generation.
      * Creates tag generators, iterates tags, filters operations, delegates generation.
@@ -98,7 +92,9 @@ public abstract class AbstractClientGenerator implements ClientGeneratorStrategy
             final Path projectRoot,
             final UserNotifier notifier) throws IOException {
 
-        final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        final List<TagCodeGenerator> tagGenerators = createTagGenerators(basePackage, projectRoot, spec, api, notifier);
+
+        final ExecutorService executor = newFixedThreadPool(getRuntime().availableProcessors());
         final List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         for (final String tag : api.getTags()) {
@@ -109,8 +105,6 @@ public abstract class AbstractClientGenerator implements ClientGeneratorStrategy
             }
 
             notifier.notifyTagProcessed(tag, operationsForTag.size());
-
-            final List<TagCodeGenerator> tagGenerators = createTagGenerators(basePackage, projectRoot, spec, api, notifier);
 
             futures.add(CompletableFuture.runAsync(() -> {
                 try {
@@ -136,6 +130,6 @@ public abstract class AbstractClientGenerator implements ClientGeneratorStrategy
     private List<ApiOperation> filterOperationsByTag(final List<ApiOperation> operations, final String tag) {
         return operations.stream()
                 .filter(operation -> tag.equals(operation.getTag()))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 }

@@ -1,6 +1,6 @@
-package tech.manggocli.core.domain.api;
+package tech.manggocli.core.domain.client;
 
-import tech.manggocli.core.domain.service.NamingService;
+import tech.manggocli.core.domain.service.JavaNames;
 
 import static java.util.Optional.ofNullable;
 
@@ -23,7 +23,7 @@ public class ClientSpec {
 
     public String getClientNamePascal() {
         return ofNullable(clientName)
-                .map(NamingService::toPascalCase)
+                .map(JavaNames::toPascalCase)
                 .orElse("Client");
     }
 
