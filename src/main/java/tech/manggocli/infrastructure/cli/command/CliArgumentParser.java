@@ -1,7 +1,7 @@
 package tech.manggocli.infrastructure.cli.command;
 
 
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.client.ClientSpec;
 import picocli.CommandLine;
 
 import java.util.ArrayList;

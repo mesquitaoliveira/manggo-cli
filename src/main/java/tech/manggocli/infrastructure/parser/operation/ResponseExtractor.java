@@ -1,7 +1,7 @@
 package tech.manggocli.infrastructure.parser.operation;
 
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 import tech.manggocli.infrastructure.parser.schema.ArrayAliasResolver;
 import tech.manggocli.infrastructure.parser.schema.SchemaBuilder;
 import io.swagger.v3.oas.models.Operation;
@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static tech.manggocli.core.domain.service.NamingService.toPascalCase;
+import static tech.manggocli.core.domain.service.JavaNames.toPascalCase;
 
 /**
  * Pattern: Single Responsibility
  * Purpose: Extracts 2xx response schema from an OAS operation.
- *          Registers anonymous inline schemas with names derived from operationId.
+ * Registers anonymous inline schemas with names derived from operationId.
  * Thread-safety: Stateful — writes to shared schemas map for inline schema registration
  */
 public final class ResponseExtractor {
@@ -31,8 +31,8 @@ public final class ResponseExtractor {
     public ResponseExtractor(final Map<String, ApiSchema> schemas,
                              final SchemaBuilder builder,
                              final ArrayAliasResolver aliasResolver) {
-        this.schemas      = schemas;
-        this.builder      = builder;
+        this.schemas = schemas;
+        this.builder = builder;
         this.aliasResolver = aliasResolver;
     }
 
@@ -65,7 +65,7 @@ public final class ResponseExtractor {
 
     private String registerInlineSchema(final ApiOperation op, final Schema<?> schema) {
         final String name = toPascalCase(
-            op.getOperationId() != null ? op.getOperationId() : "Unknown"
+                op.getOperationId() != null ? op.getOperationId() : "Unknown"
         ) + "Response";
         schemas.put(name, builder.buildApiSchema(name, schema));
         log.debug("Schema inline registrado: {}", name);

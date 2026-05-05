@@ -7,8 +7,8 @@ import tech.manggocli.infrastructure.codegen.dto.DtoGenerationContext;
 import tech.manggocli.infrastructure.codegen.dto.DtoGenerationStrategy;
 import tech.manggocli.infrastructure.codegen.dto.builder.DtoImportsCollector;
 import tech.manggocli.infrastructure.codegen.dto.builder.FieldMapper;
-import tech.manggocli.core.domain.api.ApiParameter;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiParameter;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 
 import java.io.IOException;
 import java.nio.file.Path;

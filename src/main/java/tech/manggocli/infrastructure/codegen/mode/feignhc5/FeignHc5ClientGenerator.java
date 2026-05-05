@@ -1,15 +1,17 @@
 package tech.manggocli.infrastructure.codegen.mode.feignhc5;
 
-import tech.manggocli.core.application.port.UserNotifier;
-import tech.manggocli.infrastructure.codegen.shared.TagCodeGenerator;
+import tech.manggocli.infrastructure.codegen.layout.Templates;
+import tech.manggocli.infrastructure.codegen.mode.ProjectScaffoldingGenerator;
 import tech.manggocli.infrastructure.codegen.mode.feign.AbstractFeignClientGenerator;
-import tech.manggocli.core.domain.api.ClientSpec;
-import tech.manggocli.core.domain.api.ParsedApi;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class FeignHc5ClientGenerator extends AbstractFeignClientGenerator {
+
+    public FeignHc5ClientGenerator() {
+        super(Templates.FEIGN_HC5_SMOKE_TEST, Templates.FEIGN_HC5_CLIENT_CONFIGURATION);
+    }
 
     @Override
     public String modeName() {
@@ -18,25 +20,7 @@ public class FeignHc5ClientGenerator extends AbstractFeignClientGenerator {
 
     @Override
     protected void generateProjectStructure(final String basePackage, final Path projectRoot) throws IOException {
-        new FeignHc5ProjectPomGenerator(projectRoot).generate(basePackage);
-    }
-
-    @Override
-    protected TagCodeGenerator createSmokeTestGenerator(
-            final String basePackage, final Path projectRoot, final String clientName,
-            final String authHeaderName, final UserNotifier notifier) {
-        return new FeignHc5SmokeTestGenerator(basePackage, projectRoot, clientName, authHeaderName, notifier);
-    }
-
-    @Override
-    protected void generateClientConfiguration(
-            final ParsedApi api,
-            final ClientSpec spec,
-            final String basePackage,
-            final Path projectRoot,
-            final UserNotifier notifier) throws IOException {
-
-        new FeignHc5ClientConfigurationGenerator(basePackage, projectRoot).generate(api, spec);
-        notifier.notifyFileGenerated(spec.getClientNamePascal() + "ClientConfiguration");
+        new ProjectScaffoldingGenerator(projectRoot, Templates.FEIGN_HC5_POM, "-hc5-client", "feign-hc5-client")
+                .generate(basePackage);
     }
 }

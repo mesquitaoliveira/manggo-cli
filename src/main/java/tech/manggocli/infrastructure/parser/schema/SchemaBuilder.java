@@ -1,7 +1,9 @@
 package tech.manggocli.infrastructure.parser.schema;
 
-import tech.manggocli.core.domain.api.ApiSchema;
-import tech.manggocli.core.domain.api.ApiSchemaProperty;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
+import tech.manggocli.core.domain.api.schema.ApiSchemaProperty;
 import tech.manggocli.infrastructure.parser.property.AnyOfPropertyHandler;
 import tech.manggocli.infrastructure.parser.property.EnumPropertyHandler;
 import tech.manggocli.infrastructure.parser.property.FallbackPropertyHandler;
@@ -10,10 +12,7 @@ import tech.manggocli.infrastructure.parser.property.OneOfPropertyHandler;
 import tech.manggocli.infrastructure.parser.property.PropertyResolutionContext;
 import tech.manggocli.infrastructure.parser.property.PropertyTypeHandler;
 import tech.manggocli.infrastructure.parser.type.JavaTypeResolverRegistry;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -22,14 +21,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static tech.manggocli.core.domain.service.NamingService.refToClassName;
-import static tech.manggocli.core.domain.service.NamingService.toValidJavaClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.refToClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.toValidJavaClassName;
 
 /**
  * Pattern: Single Responsibility
  * Purpose: Constructs ApiSchema and ApiSchemaProperty domain objects from raw OAS schemas.
- *          Delegates type resolution to JavaTypeResolverRegistry (Strategy)
- *          and property type detection to PropertyTypeHandler chain (Chain of Responsibility).
+ * Delegates type resolution to JavaTypeResolverRegistry (Strategy)
+ * and property type detection to PropertyTypeHandler chain (Chain of Responsibility).
  * Thread-safety: Stateful — holds reference to shared schemas map
  */
 public final class SchemaBuilder {
@@ -37,11 +36,11 @@ public final class SchemaBuilder {
     private final JavaTypeResolverRegistry typeRegistry = new JavaTypeResolverRegistry();
 
     private final PropertyTypeHandler propertyChain = PropertyTypeHandler.link(
-        new EnumPropertyHandler(),
-        new InlineObjectPropertyHandler(),
-        new OneOfPropertyHandler(),
-        new AnyOfPropertyHandler(),
-        new FallbackPropertyHandler()
+            new EnumPropertyHandler(),
+            new InlineObjectPropertyHandler(),
+            new OneOfPropertyHandler(),
+            new AnyOfPropertyHandler(),
+            new FallbackPropertyHandler()
     );
 
     private final Map<String, ApiSchema> schemas;
@@ -56,11 +55,11 @@ public final class SchemaBuilder {
         apiSchema.setType(schema.getType());
 
         final Set<String> requiredFields = schema.getRequired() != null
-            ? new HashSet<>(schema.getRequired()) : Collections.emptySet();
+                ? new HashSet<>(schema.getRequired()) : Collections.emptySet();
 
         if (schema.getProperties() != null)
             schema.getProperties().forEach((k, v) ->
-                buildProperty(k, v, name, requiredFields, apiSchema));
+                    buildProperty(k, v, name, requiredFields, apiSchema));
 
         if (schema instanceof ArraySchema arraySchema) {
             Schema<?> items = arraySchema.getItems();
@@ -91,11 +90,11 @@ public final class SchemaBuilder {
         prop.setName(propName);
 
         final PropertyResolutionContext ctx = new PropertyResolutionContext(
-            propName,
-            propSchema,
-            parentName,
-            this::registerSchemaIfAbsent,
-            this::resolveJavaType
+                propName,
+                propSchema,
+                parentName,
+                this::registerSchemaIfAbsent,
+                this::resolveJavaType
         );
         prop.setJavaType(propertyChain.resolve(ctx));
 
@@ -118,9 +117,9 @@ public final class SchemaBuilder {
         String type = schema.getType();
         if (type == null && schema.getTypes() != null) {
             type = schema.getTypes().stream()
-                .filter(t -> t != null && !"null".equals(t))
-                .findFirst()
-                .orElse(null);
+                    .filter(t -> t != null && !"null".equals(t))
+                    .findFirst()
+                    .orElse(null);
         }
         if (type == null) return "Object";
 
@@ -137,8 +136,12 @@ public final class SchemaBuilder {
      * - $ref branches → name stored in typeNames for metadata
      * - inline object branches → properties merged into target (non-overwrite, all branches)
      */
-    private void extractComposedSchemaProperties(final List<?> branches, final String name,
-                                                  final ApiSchema target, final List<String> typeNames) {
+    private void extractComposedSchemaProperties(
+            final List<?> branches,
+            final String name,
+            final ApiSchema target,
+            final List<String> typeNames
+    ) {
         for (final Object branch : branches) {
             if (!(branch instanceof Schema<?> sub)) continue;
             if (sub.get$ref() != null) {
@@ -148,7 +151,7 @@ public final class SchemaBuilder {
             if (!"object".equals(sub.getType())) continue;
             if (sub.getProperties() == null || sub.getProperties().isEmpty()) continue;
             final Set<String> branchRequired = sub.getRequired() != null
-                ? new HashSet<>(sub.getRequired()) : Collections.emptySet();
+                    ? new HashSet<>(sub.getRequired()) : Collections.emptySet();
             sub.getProperties().forEach((k, v) -> {
                 if (!target.getProperties().containsKey(k))
                     buildProperty(k, v, name, branchRequired, target);

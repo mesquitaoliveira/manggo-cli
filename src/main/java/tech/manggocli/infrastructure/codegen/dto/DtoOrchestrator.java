@@ -5,11 +5,15 @@ import tech.manggocli.infrastructure.codegen.dto.strategy.MergedRequestObjectStr
 import tech.manggocli.infrastructure.codegen.dto.strategy.EnumDtoStrategy;
 import tech.manggocli.infrastructure.codegen.dto.strategy.QueryMapDtoStrategy;
 import tech.manggocli.infrastructure.codegen.dto.strategy.RegularDtoStrategy;
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiSchema;
-import tech.manggocli.core.domain.api.ApiSchemaProperty;
-import tech.manggocli.core.domain.service.SchemaDependencyWalker;
-import tech.manggocli.core.domain.api.SchemaNode;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
+import tech.manggocli.core.domain.api.schema.ApiSchemaProperty;
+import tech.manggocli.core.domain.service.SchemaGraphResolver;
+import tech.manggocli.core.domain.api.schema.ArrayAliasNode;
+import tech.manggocli.core.domain.api.schema.EnumNode;
+import tech.manggocli.core.domain.api.schema.MissingNode;
+import tech.manggocli.core.domain.api.schema.ObjectNode;
+import tech.manggocli.core.domain.api.schema.SchemaNode;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -20,8 +24,8 @@ import java.util.Set;
 
 import static tech.manggocli.core.domain.service.ImportResolver.extractListItemType;
 import static tech.manggocli.core.domain.service.ImportResolver.isJavaPrimitive;
-import static tech.manggocli.core.domain.service.NamingService.capitalize;
-import static tech.manggocli.core.domain.service.NamingService.toPascalCase;
+import static tech.manggocli.core.domain.service.JavaNames.capitalize;
+import static tech.manggocli.core.domain.service.JavaNames.toPascalCase;
 
 /**
  * Orchestrates DTO generation for all operations within a tag.
@@ -29,7 +33,7 @@ import static tech.manggocli.core.domain.service.NamingService.toPascalCase;
  * Mirrors AbstractClientGenerator's Template Method pattern at the DTO level:
  * - generate() defines the fixed loop over operations
  * - Each case (consolidated request, queryMap, schema-based) delegates to a dedicated strategy
- * - Transitive schema resolution is handled once, centrally, via SchemaDependencyWalker
+ * - Transitive schema resolution is handled once, centrally, via SchemaGraphResolver
  * <p>
  * The generated Set is owned here and threaded through DtoGenerationContext so all
  * strategies share the same deduplication state within one generation run.
@@ -90,7 +94,7 @@ public final class DtoOrchestrator {
     // ─────────────────────────────────────────────────────────────────────────
 
     private void generateDtoAndDeps(final String tag, final String dtoName, final boolean isRequest) throws IOException {
-        final SchemaDependencyWalker walker = new SchemaDependencyWalker(schemas, generated);
+        final SchemaGraphResolver walker = new SchemaGraphResolver(schemas, generated);
         for (final SchemaNode node : walker.collect(dtoName, tag, isRequest)) {
             writeSchemaNode(tag, node);
         }
@@ -98,11 +102,11 @@ public final class DtoOrchestrator {
 
     private void writeSchemaNode(final String tag, final SchemaNode node) throws IOException {
         final DtoGenerationContext ctx = buildContext(tag, null, node.isRequest());
-        switch (node.kind()) {
-            case ENUM -> enumStrategy.generate(ctx, node.name());
-            case ARRAY_ALIAS -> {
-            }  // item dependencies already collected by walker
-            case OBJECT, MISSING -> regularStrategy.generate(ctx, node.name());
+        switch (node) {
+            case EnumNode e        -> enumStrategy.generate(ctx, e.name());
+            case ArrayAliasNode a  -> { /* item dependencies already collected by walker */ }
+            case ObjectNode o      -> regularStrategy.generate(ctx, o.name());
+            case MissingNode m     -> regularStrategy.generate(ctx, m.name());
         }
     }
 

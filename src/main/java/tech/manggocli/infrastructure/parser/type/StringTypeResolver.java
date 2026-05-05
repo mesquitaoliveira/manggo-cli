@@ -16,11 +16,11 @@ public final class StringTypeResolver implements JavaTypeResolver {
         final String format = schema.getFormat();
         if (format == null) return "String";
         return switch (format) {
-            case "date"      -> "LocalDate";
+            case "date" -> "LocalDate";
             case "date-time" -> "LocalDateTime";
-            case "uuid"      -> "UUID";
-            case "binary"    -> "byte[]";
-            default          -> "String";
+            case "uuid" -> "UUID";
+            case "binary" -> "byte[]";
+            default -> "String";
         };
     }
 }

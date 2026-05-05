@@ -1,9 +1,9 @@
-package tech.manggocli.infrastructure.codegen.mode.httpclient;
+package tech.manggocli.infrastructure.codegen.mode.nativeclient;
 
 import tech.manggocli.core.application.port.UserNotifier;
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiParameter;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiParameter;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 import tech.manggocli.core.domain.service.OperationTypeResolver;
 import tech.manggocli.infrastructure.codegen.layout.PackageNames;
 import tech.manggocli.infrastructure.codegen.layout.Templates;
@@ -24,8 +24,8 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import static tech.manggocli.core.domain.service.ImportResolver.extractListItemType;
-import static tech.manggocli.core.domain.service.NamingService.capitalize;
-import static tech.manggocli.core.domain.service.NamingService.toPascalCase;
+import static tech.manggocli.core.domain.service.JavaNames.capitalize;
+import static tech.manggocli.core.domain.service.JavaNames.toPascalCase;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.mainSourcePath;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.writeJavaFile;
 

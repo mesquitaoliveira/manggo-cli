@@ -4,7 +4,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.List;
 
-import static tech.manggocli.core.domain.service.NamingService.refToClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.refToClassName;
 
 /**
  * Pattern: Chain of Responsibility (Concrete Handler)
@@ -19,15 +19,15 @@ public final class AnyOfPropertyHandler extends PropertyTypeHandler {
         if (anyOf == null || anyOf.isEmpty()) return null;
 
         return anyOf.stream()
-            .filter(s -> s instanceof Schema<?> schema && schema.get$ref() != null)
-            .map(s -> refToClassName(((Schema<?>) s).get$ref()))
-            .findFirst()
-            .orElseGet(() -> anyOf.stream()
-                .filter(s -> s instanceof Schema<?> schema
-                        && schema.getType() != null
-                        && !"null".equals(schema.getType()))
-                .map(s -> ctx.resolveJavaType().apply((Schema<?>) s))
+                .filter(s -> s instanceof Schema<?> schema && schema.get$ref() != null)
+                .map(s -> refToClassName(((Schema<?>) s).get$ref()))
                 .findFirst()
-                .orElse(null));
+                .orElseGet(() -> anyOf.stream()
+                        .filter(s -> s instanceof Schema<?> schema
+                                && schema.getType() != null
+                                && !"null".equals(schema.getType()))
+                        .map(s -> ctx.resolveJavaType().apply((Schema<?>) s))
+                        .findFirst()
+                        .orElse(null));
     }
 }

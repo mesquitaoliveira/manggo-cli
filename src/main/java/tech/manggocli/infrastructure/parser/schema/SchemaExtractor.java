@@ -1,6 +1,6 @@
 package tech.manggocli.infrastructure.parser.schema;
 
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import org.slf4j.Logger;
@@ -13,14 +13,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static tech.manggocli.core.domain.service.NamingService.refToClassName;
-import static tech.manggocli.core.domain.service.NamingService.toValidJavaClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.refToClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.toValidJavaClassName;
 
 /**
  * Pattern: Single Responsibility
  * Purpose: Extracts and builds all ApiSchema entries from OpenAPI components/schemas.
- *          Uses a two-pass strategy: first build all schemas, then merge allOf references
- *          (allOf resolution requires all schemas to already be present in the map).
+ * Uses a two-pass strategy: first build all schemas, then merge allOf references
+ * (allOf resolution requires all schemas to already be present in the map).
  * Thread-safety: Stateful — populates the shared schemas map
  */
 public final class SchemaExtractor {
@@ -46,16 +46,12 @@ public final class SchemaExtractor {
         log.info("Schemas encontrados: {}", schemas.size());
     }
 
-    // ─── Pass 1 ───────────────────────────────────────────────────────────────
-
     private void buildAllSchemas(final OpenAPI openAPI) {
         openAPI.getComponents().getSchemas().forEach((name, schema) -> {
             final String javaName = toValidJavaClassName(name);
             schemas.put(javaName, builder.buildApiSchema(javaName, schema));
         });
     }
-
-    // ─── Pass 2: allOf merge ──────────────────────────────────────────────────
 
     private void mergeAllOf(final OpenAPI openAPI) {
         openAPI.getComponents().getSchemas().forEach((name, schema) -> {
@@ -91,8 +87,6 @@ public final class SchemaExtractor {
         }
     }
 
-    // ─── Pass 3: oneOf/anyOf ref merge ───────────────────────────────────────
-
     /**
      * For schemas whose oneOf/anyOf branches are all $refs (no inline object properties
      * were extracted in Pass 1), merges properties from each referenced schema.
@@ -110,38 +104,36 @@ public final class SchemaExtractor {
         });
     }
 
-    // ─── Pass 4: scalar-alias $ref resolution ────────────────────────────────
-
     /**
      * Replaces property javaType values that point to scalar-type aliases (type:boolean/integer/
      * number/string with no enum) with the corresponding Java built-in. This prevents generated
-     * DTOs from referencing classes that are intentionally not generated (see SchemaDependencyWalker).
+     * DTOs from referencing classes that are intentionally not generated (see SchemaGraphResolver).
      * Runs after all passes so resolution is order-independent.
      */
     private void resolveScalarAliasRefs() {
         schemas.forEach((ignored, apiSchema) ->
-            apiSchema.getProperties().forEach((propName, prop) -> {
-                final ApiSchema alias = schemas.get(prop.getJavaType());
-                if (alias != null && !alias.isEnumType()
-                        && isScalarType(alias.getType())
-                        && alias.getProperties().isEmpty()) {
-                    prop.setJavaType(scalarToJavaType(alias.getType()));
-                }
-            })
+                apiSchema.getProperties().forEach((propName, prop) -> {
+                    final ApiSchema alias = schemas.get(prop.getJavaType());
+                    if (alias != null && !alias.isEnumType()
+                            && isScalarType(alias.getType())
+                            && alias.getProperties().isEmpty()) {
+                        prop.setJavaType(scalarToJavaType(alias.getType()));
+                    }
+                })
         );
     }
 
     private static boolean isScalarType(final String type) {
         return "boolean".equals(type) || "integer".equals(type)
-            || "number".equals(type) || "string".equals(type);
+                || "number".equals(type) || "string".equals(type);
     }
 
     private static String scalarToJavaType(final String oasType) {
         return switch (oasType) {
-            case "boolean"  -> "Boolean";
-            case "integer"  -> "Integer";
-            case "number"   -> "Double";
-            default         -> "String";
+            case "boolean" -> "Boolean";
+            case "integer" -> "Integer";
+            case "number" -> "Double";
+            default -> "String";
         };
     }
 
@@ -158,7 +150,7 @@ public final class SchemaExtractor {
     private void mergeInlineProperties(final Schema<?> sub, final String parentName,
                                        final Set<String> extraRequired, final ApiSchema target) {
         final Set<String> subRequired = sub.getRequired() != null
-            ? new HashSet<>(sub.getRequired()) : Collections.emptySet();
+                ? new HashSet<>(sub.getRequired()) : Collections.emptySet();
         subRequired.addAll(extraRequired);
         sub.getProperties().forEach((k, v) -> {
             if (!target.getProperties().containsKey(k))

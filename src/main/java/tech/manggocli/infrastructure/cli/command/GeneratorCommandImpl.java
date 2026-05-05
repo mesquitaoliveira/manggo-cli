@@ -1,7 +1,7 @@
 package tech.manggocli.infrastructure.cli.command;
 
 import tech.manggocli.core.application.usecase.GenerateClientUseCase;
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.client.ClientSpec;
 import tech.manggocli.core.domain.exception.GeneratorException;
 import tech.manggocli.infrastructure.cli.GeneratorConfig;
 import tech.manggocli.infrastructure.cli.bootstrap.CliBootstrap;

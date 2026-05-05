@@ -1,7 +1,7 @@
 package tech.manggocli.infrastructure.codegen.shared;
 
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 
 import java.io.IOException;
 import java.util.List;

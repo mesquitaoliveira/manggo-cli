@@ -2,8 +2,8 @@ package tech.manggocli.support;
 
 import tech.manggocli.core.application.port.UserNotifier;
 import tech.manggocli.infrastructure.codegen.mode.feign.FeignClientGenerator;
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ClientSpec;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.client.ClientSpec;
 import tech.manggocli.core.domain.api.ParsedApi;
 import tech.manggocli.infrastructure.parser.OpenApiParser;
 import org.junit.jupiter.api.io.TempDir;

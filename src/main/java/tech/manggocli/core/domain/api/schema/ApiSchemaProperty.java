@@ -1,10 +1,9 @@
-package tech.manggocli.core.domain.api;
+package tech.manggocli.core.domain.api.schema;
 
-import tech.manggocli.core.domain.service.NamingService;
+import tech.manggocli.core.domain.api.NamedField;
 
-import static java.util.Optional.ofNullable;
+public class ApiSchemaProperty implements NamedField {
 
-public class ApiSchemaProperty {
     private String name;
     private String javaType;
     private boolean required;
@@ -20,6 +19,7 @@ public class ApiSchemaProperty {
         this.required = required;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -28,6 +28,7 @@ public class ApiSchemaProperty {
         this.name = name;
     }
 
+    @Override
     public String getJavaType() {
         return javaType;
     }
@@ -36,6 +37,7 @@ public class ApiSchemaProperty {
         this.javaType = javaType;
     }
 
+    @Override
     public boolean isRequired() {
         return required;
     }
@@ -44,6 +46,7 @@ public class ApiSchemaProperty {
         this.required = required;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
@@ -60,10 +63,9 @@ public class ApiSchemaProperty {
         this.format = format;
     }
 
-    public String getCamelCaseName() {
-        return ofNullable(name)
-                .map(NamingService::toCamelCase)
-                .orElse("field");
+    @Override
+    public String defaultFallbackName() {
+        return "field";
     }
 
     public String getCapitalizedName() {

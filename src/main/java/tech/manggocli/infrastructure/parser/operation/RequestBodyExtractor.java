@@ -1,6 +1,6 @@
 package tech.manggocli.infrastructure.parser.operation;
 
-import tech.manggocli.core.domain.api.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-import static tech.manggocli.core.domain.service.NamingService.refToClassName;
-import static tech.manggocli.core.domain.service.NamingService.toValidJavaClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.refToClassName;
+import static tech.manggocli.core.domain.service.JavaIdentifiers.toValidJavaClassName;
 
 /**
  * Pattern: Single Responsibility

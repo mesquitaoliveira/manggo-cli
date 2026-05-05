@@ -1,13 +1,12 @@
-package tech.manggocli.core.domain.api;
+package tech.manggocli.core.domain.api.operation;
 
-import tech.manggocli.core.domain.service.NamingService;
-
-import static java.util.Optional.ofNullable;
+import tech.manggocli.core.domain.api.NamedField;
 
 /**
- * Represents a single operation parameter (query, path, or header).
+ * A single operation parameter (query, path, or header).
  */
-public class ApiParameter {
+public class ApiParameter implements NamedField {
+
     private String name;
     private String javaType;
     private boolean required;
@@ -16,16 +15,13 @@ public class ApiParameter {
     public ApiParameter() {
     }
 
-    public ApiParameter(
-            final String name,
-            final String javaType,
-            final boolean required
-    ) {
+    public ApiParameter(final String name, final String javaType, final boolean required) {
         this.name = name;
         this.javaType = javaType;
         this.required = required;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -34,6 +30,7 @@ public class ApiParameter {
         this.name = name;
     }
 
+    @Override
     public String getJavaType() {
         return javaType;
     }
@@ -42,6 +39,7 @@ public class ApiParameter {
         this.javaType = javaType;
     }
 
+    @Override
     public boolean isRequired() {
         return required;
     }
@@ -50,6 +48,7 @@ public class ApiParameter {
         this.required = required;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
@@ -58,9 +57,8 @@ public class ApiParameter {
         this.description = d;
     }
 
-    public String getCamelCaseName() {
-        return ofNullable(name)
-                .map(NamingService::toCamelCase)
-                .orElse("param");
+    @Override
+    public String defaultFallbackName() {
+        return "param";
     }
 }

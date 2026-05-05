@@ -1,6 +1,6 @@
 package tech.manggocli.infrastructure.codegen.mode;
 
-import tech.manggocli.core.domain.api.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
 
 import java.util.List;
 import java.util.Optional;

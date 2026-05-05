@@ -2,8 +2,8 @@ package tech.manggocli.infrastructure.codegen.shared;
 
 import tech.manggocli.infrastructure.codegen.layout.PackageNames;
 import tech.manggocli.infrastructure.codegen.layout.Templates;
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 import tech.manggocli.core.application.port.UserNotifier;
 import tech.manggocli.core.domain.service.OperationTypeResolver;
 
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.mainSourcePath;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.writeJavaFile;
-import static tech.manggocli.core.domain.service.NamingService.toPascalCase;
+import static tech.manggocli.core.domain.service.JavaNames.toPascalCase;
 
 public class RestInterfaceGenerator implements TagCodeGenerator {
 

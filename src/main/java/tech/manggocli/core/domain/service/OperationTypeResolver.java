@@ -1,17 +1,18 @@
 package tech.manggocli.core.domain.service;
 
-import tech.manggocli.core.domain.api.ApiOperation;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
 
 /**
  * Domain service: resolves the Java request/response types for an API operation.
- *
+ * <p>
  * Single source of truth — eliminates duplication across RestInterfaceGenerator,
  * RestClientGenerator, NativeRestClientGenerator, FeignSmokeTestGenerator,
  * NativeSmokeTestGenerator, and FeignHc5SmokeTestGenerator.
  */
 public final class OperationTypeResolver {
 
-    private OperationTypeResolver() {}
+    private OperationTypeResolver() {
+    }
 
     /**
      * Returns the Java class name that represents the request payload for {@code op}.
@@ -25,7 +26,7 @@ public final class OperationTypeResolver {
             return op.getRequestBodySchema();
         }
         if (op.isUseQueryMap() && !op.getQueryParams().isEmpty()) {
-            return NamingService.toPascalCase(tag) + NamingService.capitalize(op.getMethodName()) + "Request";
+            return JavaNames.toPascalCase(tag) + JavaNames.capitalize(op.getMethodName()) + "Request";
         }
         return null;
     }

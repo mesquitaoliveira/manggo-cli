@@ -1,8 +1,8 @@
 package tech.manggocli.infrastructure.codegen.mode;
 
 import tech.manggocli.core.application.port.UserNotifier;
-import tech.manggocli.core.domain.api.ApiOperation;
-import tech.manggocli.core.domain.api.ApiSchema;
+import tech.manggocli.core.domain.api.operation.ApiOperation;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
 import tech.manggocli.core.domain.service.OperationTypeResolver;
 import tech.manggocli.infrastructure.codegen.layout.PackageNames;
 import tech.manggocli.infrastructure.codegen.mode.nullarg.BodyNullArgHandler;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static tech.manggocli.core.domain.service.NamingService.toPascalCase;
+import static tech.manggocli.core.domain.service.JavaNames.toPascalCase;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.testSourcePath;
 import static tech.manggocli.infrastructure.codegen.layout.MavenLayout.writeJavaFile;
 
@@ -62,10 +62,6 @@ public abstract class AbstractSmokeTestGenerator implements TagCodeGenerator {
         this.notifier = notifier;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Template Method — fixed generation sequence
-    // ─────────────────────────────────────────────────────────────────────────
-
     @Override
     public final void generate(final String tag, final List<ApiOperation> operations,
                                final Map<String, ApiSchema> schemas) throws IOException {
@@ -100,10 +96,6 @@ public abstract class AbstractSmokeTestGenerator implements TagCodeGenerator {
         notifier.notifyFileGenerated(className);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Hooks
-    // ─────────────────────────────────────────────────────────────────────────
-
     protected abstract String templateName();
 
     /**
@@ -124,10 +116,6 @@ public abstract class AbstractSmokeTestGenerator implements TagCodeGenerator {
     protected boolean isDisabled(final ApiOperation op) {
         return false;
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Common private logic
-    // ─────────────────────────────────────────────────────────────────────────
 
     private Map<String, Object> buildMethodContext(final ApiOperation op, final String req, final String res) {
         final String ret = Objects.requireNonNullElse(res, "void");

@@ -1,9 +1,9 @@
 package tech.manggocli.infrastructure.codegen.dto.builder;
 
 import tech.manggocli.infrastructure.codegen.layout.PackageNames;
-import tech.manggocli.core.domain.api.ApiParameter;
-import tech.manggocli.core.domain.api.ApiSchema;
-import tech.manggocli.core.domain.api.ApiSchemaProperty;
+import tech.manggocli.core.domain.api.operation.ApiParameter;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
+import tech.manggocli.core.domain.api.schema.ApiSchemaProperty;
 
 import java.util.LinkedHashSet;
 import java.util.Map;

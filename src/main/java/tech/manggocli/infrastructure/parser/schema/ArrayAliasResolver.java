@@ -1,7 +1,7 @@
 package tech.manggocli.infrastructure.parser.schema;
 
-import tech.manggocli.core.domain.api.ApiSchema;
-import tech.manggocli.core.domain.api.ApiSchemaProperty;
+import tech.manggocli.core.domain.api.schema.ApiSchema;
+import tech.manggocli.core.domain.api.schema.ApiSchemaProperty;
 
 import java.util.Map;
 
@@ -10,7 +10,7 @@ import static tech.manggocli.core.domain.service.ImportResolver.extractListItemT
 /**
  * Pattern: Single Responsibility
  * Purpose: Resolves array-alias schemas (type=array with no properties) to List<ItemType>.
- *          Example: AuditLogsData (array alias) → List<AuditLogData>
+ * Example: AuditLogsData (array alias) → List<AuditLogData>
  * Thread-safety: Stateful — holds reference to shared schemas map
  */
 public final class ArrayAliasResolver {
